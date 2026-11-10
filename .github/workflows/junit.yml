@@ -1,0 +1,29 @@
+name: junit
+on: [push]
+permissions:
+  contents: read
+  checks: write
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Write a JUnit report and fail
+        run: |
+          mkdir -p reports
+          cat > reports/junit.xml <<'XML'
+          <testsuites>
+            <testsuite name="probe" tests="4" failures="2" errors="0" skipped="1">
+              <testcase classname="probe.Math" name="adds" file="src/math.ts"/>
+              <testcase classname="probe.Math" name="subtracts" file="src/math.ts"><failure message="expected 2, got 3">AssertionError: expected 2, got 3
+              at src/math.ts:12</failure></testcase>
+              <testcase classname="probe.Strings" name="joins" file="src/strings.ts"><failure message="expected 'a-b', got 'ab'">AssertionError: expected 'a-b', got 'ab'</failure></testcase>
+              <testcase classname="probe.Strings" name="skipped one"><skipped/></testcase>
+            </testsuite>
+          </testsuites>
+          XML
+          exit 1
+      - name: Publish the JUnit report
+        if: always()
+        uses: mikepenz/action-junit-report@v5
+        with:
+          report_paths: reports/junit.xml
