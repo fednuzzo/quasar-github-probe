@@ -1,0 +1,35 @@
+name: red
+on: [push]
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Prepare
+        run: echo "preparing"
+      - name: Run the tests
+        run: |
+          mkdir -p reports
+          cat > reports/junit.xml <<'XML'
+          <testsuite name="probe" tests="3" failures="1" errors="0" skipped="1">
+            <testcase classname="probe" name="passes"/>
+            <testcase classname="probe" name="fails"><failure message="expected 2, got 3">AssertionError: expected 2, got 3</failure></testcase>
+            <testcase classname="probe" name="skipped"><skipped/></testcase>
+          </testsuite>
+          XML
+          echo "::error file=VERSION,line=1,title=probe failure::expected 2, got 3"
+          for i in $(seq 1 300); do echo "log line $i"; done
+          exit 1
+      - name: Never runs
+        run: echo "unreachable"
+  skipped:
+    runs-on: ubuntu-latest
+    if: false
+    steps:
+      - run: echo "never"
+  timed-out:
+    runs-on: ubuntu-latest
+    timeout-minutes: 1
+    steps:
+      - name: Sleep past the timeout
+        run: sleep 120

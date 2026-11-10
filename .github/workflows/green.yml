@@ -1,0 +1,10 @@
+name: green
+on: [push]
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Say hello
+        run: echo "hello"
+      - name: Check the version file
+        run: cat VERSION || true
